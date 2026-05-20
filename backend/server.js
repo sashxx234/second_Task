@@ -21,7 +21,6 @@ try {
 
 app.post("/reg", async(req, res) =>{
     try {
-
         const {login, pass, fio, phone, email} = req.body;
         await connection.query(
             "insert into users (login, pass, fio, phone, email) values(?, ?, ?, ?, ?)",
@@ -51,12 +50,6 @@ app.post("/auth", async(req, res) =>{
     }
 });
 
-app.get('/req', async(req, res)=>{
-    const [results] = await connection.query(
-        "select r.*, rs.name as status_name from requests r  join req_status rs on r.status_id = rs.id"
-    )
-    res.json(results)
-})
 
 app.get('/req/:userId', async (req, res) => {
     try {
@@ -67,9 +60,39 @@ app.get('/req/:userId', async (req, res) => {
         );
         res.json(results);
     } catch (error) {
+        res.json([]);
+    }
+});
+
+app.get('/all-req', async (req, res) => {  
+    try {
+        const [results] = await connection.query(
+            "SELECT r.*, u.fio, rs.name_ as status_name FROM requests r JOIN users u ON u.id = r.user_id JOIN req_status rs ON rs.id = r.status_id"
+        )
+        res.json(results);
+    } catch (error) {
         console.log(error);
         res.json([]);
     }
 });
 
-app.listen(2000, () => console.log("Сервер запущен"))
+app.post('/form-req', async (req, res)=>{
+    try {
+        const {course, study_data, payment_type, user_id} = req.body
+        await connection.query(
+            "INSERT INTO requests (course, study_data, payment_type, status_id, user_id) VALUES (?, ?, ?, 1, ?)",
+            [course, study_data, payment_type, user_id]
+        )
+        res.json({success: true})
+    } catch (error) {
+        res.json({success: false})
+    }
+})
+
+app.put('/requests/status', async (req, res) => {
+  const { request_id, status_id } = req.body;
+  await connection.query("UPDATE requests SET status_id = ? WHERE id = ?", [status_id, request_id]);
+  res.json({ success: true });
+});
+
+app.listen(2000, () => console.log("Сервер запущен"));

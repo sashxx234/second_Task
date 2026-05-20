@@ -5,12 +5,12 @@ export function Requests(){
     const [requests, setRequests] = useState([])
     const nav = useNavigate()
 
-    useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user'))
-        if (user) {
-            fetchRequests(user.id)
-        }
-    }, [])
+useEffect(() =>{
+    const user = JSON.parse(localStorage.getItem('user'))
+    if(user){
+        fetchRequests(user.id)
+    }
+}, [])
 
     const fetchRequests = async (userId) => {
         try {
@@ -40,6 +40,7 @@ export function Requests(){
                 </div>
             )}
             <button onClick={() => nav('/form-req')}>Новая заявка</button>
+            <button onClick={()=> {localStorage.removeItem('user'); nav('/auth')}}>Выйти</button>
         </div>
     )
 }
